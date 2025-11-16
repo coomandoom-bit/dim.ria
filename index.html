@@ -119,22 +119,30 @@
             margin-bottom: 25px;
         }
 
+        /* ИСПРАВЛЕННЫЙ БЛОК — САМЫЙ ЛУЧШИЙ ВАРИАНТ */
         .code-input {
-            width: 50px;
+            width: 58px;
             height: 58px;
             font-size: 28px;
             font-weight: bold;
-            text-align: center;
             border: 2px solid var(--border);
             border-radius: 12px;
             transition: all 0.3s ease;
             background: #fff;
+            padding: 0;
+            box-sizing: border-box;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
 
         .code-input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
             transform: scale(1.05);
+            outline: none;
         }
 
         .submit-button {
@@ -228,7 +236,7 @@
                     <input type="text" maxlength="1" class="code-input" id="code-6" inputmode="numeric" pattern="[0-9]" aria-label="Цифра 6">
                 </div>
                 <button type="button" class="submit-button" onclick="sendSmsCode()">
-                    Підтвердити
+                    Підтвер-DA
                 </button>
             </div>
         </div>
