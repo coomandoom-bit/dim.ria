@@ -3,81 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Панель реферала</title>
+  <title>Панель рефералів</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #1a1a2e;
-      color: #eee;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: #16213e;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-      width: 380px;
-      text-align: center;
-    }
-    h1 {
-      margin: 0 0 20px;
-      color: #00ffff;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid #00ffff;
-      border-radius: 8px;
-      background: #0f3460;
-      color: #fff;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #00ffff;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    button:hover {
-      background: #00cccc;
-    }
-    .link-output {
-      margin-top: 20px;
-      padding: 12px;
-      background: #0f3460;
-      border: 1px solid #00ffff;
-      border-radius: 8px;
-      word-break: break-all;
-      font-family: monospace;
-      color: #0f0;
-    }
+    body {font-family: 'Segoe UI', sans-serif;background: #1a1a2e;color: #eee;display: flex;justify-content: center;align-items: center;height: 100vh;margin: 0;}
+    .container {background: #16213e;padding: 30px;border-radius: 12px;box-shadow: 0 0 20px rgba(0,255,255,0.2);width: 380px;text-align: center;}
+    h1 {margin: 0 0 20px;color: #00ffff;}
+    select, input {width: 100%;padding: 12px;margin: 10px 0;border: 1px solid #00ffff;border-radius: 8px;background: #0f3460;color: #fff;font-size: 16px;}
+    button {width: 100%;padding: 12px;background: #00ffff;color: #000;border: none;border-radius: 8px;font-weight: bold;cursor: pointer;margin-top: 10px;}
+    button:hover {background: #00cccc;}
+    .link-output {margin-top: 20px;padding: 12px;background: #0f3460;border: 1px solid #00ffff;border-radius: 8px;word-break: break-all;font-family: monospace;color: #0f0;}
     .hidden { display: none; }
   </style>
 </head>
 <body>
-
-  <!-- Форма входа -->
   <div id="loginForm" class="container">
-    <h1>🔐 Вхід у панель</h1>
-    <input type="password" id="password" placeholder="Введіть пароль" />
+    <h1>Вхід у панель</h1>
+    <input type="password" id="password" placeholder="Пароль" />
     <button onclick="checkPassword()">Увійти</button>
   </div>
 
-  <!-- Панель генерації -->
   <div id="panel" class="container hidden">
-    <h1>🔗 Генератор реф-посилань</h1>
-    <input type="text" id="nickname" placeholder="Введіть нік @username" />
-    <button onclick="generateLink()">Створити посилання</button>
+    <h1>Генератор реф-посилань</h1>
+    <select id="project">
+      <option value="dimria">DIM.RIA</option>
+      <option value="autoria">AUTO.RIA</option>
+      <option value="ria">RIA.COM</option>
+    </select>
+    <input type="text" id="nickname" placeholder="@username" />
+    <button onclick="generateLink()">Створити</button>
     <div id="linkOutput" class="link-output hidden"></div>
   </div>
 
@@ -85,8 +38,7 @@
     const correctPassword = "1918";
 
     function checkPassword() {
-      const input = document.getElementById("password").value;
-      if (input === correctPassword) {
+      if (document.getElementById("password").value === correctPassword) {
         document.getElementById("loginForm").classList.add("hidden");
         document.getElementById("panel").classList.remove("hidden");
       } else {
@@ -95,22 +47,12 @@
     }
 
     function generateLink() {
-      const nick = document.getElementById("nickname").value.trim();
-      if (!nick) {
-        alert("Введіть нікнейм!");
-        return;
-      }
+      const project = document.getElementById("project").value;
+      const nick = document.getElementById("nickname").value.trim().replace(/^@/, '');
+      if (!nick) return alert("Введіть @username!");
 
-      // Убираем @ если есть
-      const cleanNick = nick.replace(/^@/, '');
-      if (!cleanNick) {
-        alert("Нікнейм не може бути порожнім!");
-        return;
-      }
-
-      // Формируем ссылку БЕЗ ника в URL
-      const baseUrl = window.location.origin;
-      const refLink = `${baseUrl}/?ref=${btoa(cleanNick)}`;
+      const base = window.location.origin;
+      const refLink = `${base}/?project=${project}&ref=${btoa(nick)}`;
 
       const output = document.getElementById("linkOutput");
       output.textContent = refLink;
