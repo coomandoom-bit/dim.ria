@@ -1,7 +1,7 @@
 {
-  "name": "autoria-collector",
+  "name": "dimria-collector",
   "version": "1.0.0",
-  "description": "Simple server to collect data and send to Telegram",
+  "description": "DIM.RIA Data Collector",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
