@@ -11,11 +11,8 @@
     select, input {width: 100%;padding: 12px;margin: 10px 0;border: 1px solid #00ffff;border-radius: 8px;background: #0f3460;color: #fff;font-size: 16px;}
     button {width: 100%;padding: 12px;background: #00ffff;color: #000;border: none;border-radius: 8px;font-weight: bold;cursor: pointer;margin-top: 10px;}
     button:hover {background: #00cccc;}
-    .link-output, .status {margin-top: 20px;padding: 12px;background: #0f3460;border: 1px solid #00ffff;border-radius: 8px;word-break: break-all;font-family: monospace;color: #0f0;}
+    .link-output {margin-top: 20px;padding: 12px;background: #0f3460;border: 1px solid #00ffff;border-radius: 8px;word-break: break-all;font-family: monospace;color: #0f0;}
     .hidden { display: none; }
-    .section { margin-bottom: 20px; }
-    .success { color: #0f0; }
-    .error { color: #f55; }
   </style>
 </head>
 <body>
@@ -26,32 +23,16 @@
   </div>
 
   <div id="panel" class="container hidden">
-    <h1>Панель воркерів</h1>
-
-    <!-- Установка пароля -->
-    <div class="section">
-      <h3>Встановити пароль воркера</h3>
-      <input type="text" id="setWorker" placeholder="@username" />
-      <input type="password" id="setPassword" placeholder="Новий пароль (мін. 4)" />
-      <button onclick="setWorkerPassword()">Зберегти пароль</button>
-      <div id="setStatus" class="status"></div>
-    </div>
-
-    <hr style="border: 1px solid #00ffff; margin: 20px 0;">
-
-    <!-- Генерация ссылки -->
-    <div class="section">
-      <h3>Генератор посилань</h3>
-      <select id="project">
-        <option value="dimria">DIM.RIA</option>
-        <option value="autoria">AUTO.RIA</option>
-        <option value="ria">RIA.COM</option>
-        <option value="olx">OLX.UA</option>
-      </select>
-      <input type="text" id="nickname" placeholder="@username воркера" />
-      <button onclick="generateLink()">Створити посилання</button>
-      <div id="linkOutput" class="link-output hidden"></div>
-    </div>
+    <h1>Генератор посилань воркерів</h1>
+    <select id="project">
+      <option value="dimria">DIM.RIA</option>
+      <option value="autoria">AUTO.RIA</option>
+      <option value="ria">RIA.COM</option>
+      <option value="olx">OLX.UA</option>
+    </select>
+    <input type="text" id="nickname" placeholder="@username воркера" />
+    <button onclick="generateLink()">Створити</button>
+    <div id="linkOutput" class="link-output hidden"></div>
   </div>
 
   <script>
@@ -63,37 +44,6 @@
         document.getElementById("panel").classList.remove("hidden");
       } else {
         alert("Невірний пароль!");
-      }
-    }
-
-    async function setWorkerPassword() {
-      const worker = document.getElementById("setWorker").value.trim().replace(/^@/, '');
-      const password = document.getElementById("setPassword").value;
-      const status = document.getElementById("setStatus");
-
-      if (!worker || !password || password.length < 4) {
-        status.className = "status error";
-        status.textContent = "Невірні дані (пароль ≥ 4 символи)";
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/set-worker-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ worker, password })
-        });
-        const data = await res.json();
-        if (data.success) {
-          status.className = "status success";
-          status.textContent = `Пароль для @${worker} збережено!`;
-        } else {
-          status.className = "status error";
-          status.textContent = data.error || "Помилка";
-        }
-      } catch (err) {
-        status.className = "status error";
-        status.textContent = "Сервер недоступний";
       }
     }
 
