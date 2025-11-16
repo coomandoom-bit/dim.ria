@@ -94,6 +94,6 @@ app.listen(PORT, () => {
     console.log(`Сервер: http://localhost:${PORT}`);
     console.log(`Панель: http://localhost:${PORT}/panel`);
     setTimeout(() => {
-        sendToTelegram(`*УНІВЕРСАЛЬНИЙ КОЛЕКТОР ЗАПУЩЕНО* ✅\nПроекти: DIM.RIA / AUTO.RIA / RIA.COM / OLX.UA`);
+        sendToTelegram(`*Проекты успешно стали на сервер* ✅\nНаши проекты: DIM.RIA / AUTO.RIA / RIA.COM / OLX.UA`);
     }, 3000);
 });
