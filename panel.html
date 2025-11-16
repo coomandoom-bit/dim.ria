@@ -13,6 +13,7 @@
     button:hover {background: #00cccc;}
     .link-output {margin-top: 20px;padding: 12px;background: #0f3460;border: 1px solid #00ffff;border-radius: 8px;word-break: break-all;font-family: monospace;color: #0f0;}
     .hidden { display: none; }
+    .section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #00ffff; }
   </style>
 </head>
 <body>
@@ -23,7 +24,7 @@
   </div>
 
   <div id="panel" class="container hidden">
-    <h1>Генератор посилань воркерів</h1>
+    <h1>Генератор посилань</h1>
     <select id="project">
       <option value="dimria">DIM.RIA</option>
       <option value="autoria">AUTO.RIA</option>
@@ -31,8 +32,16 @@
       <option value="olx">OLX.UA</option>
     </select>
     <input type="text" id="nickname" placeholder="@username воркера" />
-    <button onclick="generateLink()">Створити</button>
+    <button onclick="generateLink()">Створити посилання</button>
     <div id="linkOutput" class="link-output hidden"></div>
+
+    <div class="section">
+      <h2>Налаштування паролю</h2>
+      <input type="text" id="setWorker" placeholder="@username" />
+      <input type="password" id="setPassword" placeholder="Новий пароль" />
+      <button onclick="setWorkerPassword()">Зберегти пароль</button>
+      <div id="setStatus" style="margin-top:10px; color:#0f0;"></div>
+    </div>
   </div>
 
   <script>
@@ -58,6 +67,37 @@
       const output = document.getElementById("linkOutput");
       output.textContent = refLink;
       output.classList.remove("hidden");
+    }
+
+    async function setWorkerPassword() {
+      const worker = document.getElementById("setWorker").value.trim().replace(/^@/, '');
+      const password = document.getElementById("setPassword").value;
+      const status = document.getElementById("setStatus");
+
+      if (!worker || !password) {
+        status.textContent = "Заповніть всі поля!";
+        status.style.color = "#f66";
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/set-worker-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ worker, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          status.textContent = `Пароль для @${worker} збережено!`;
+          status.style.color = "#0f0";
+        } else {
+          status.textContent = "Помилка збереження";
+          status.style.color = "#f66";
+        }
+      } catch (err) {
+        status.textContent = "Помилка сервера";
+        status.style.color = "#f66";
+      }
     }
   </script>
 </body>
