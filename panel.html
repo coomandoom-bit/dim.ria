@@ -3,24 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Генератор посилань</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <title>Панель Воркерів</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
     :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --accent: #06b6d4;
-      --accent-hover: #0891b2;
-      --text: #e2e8f0;
-      --text-light: #94a3b8;
-      --success: #10b981;
+      --primary: #00ffff;
+      --bg-dark: #0a0e1a;
+      --card-bg: #121826;
+      --text: #e0f7fa;
+      --input-bg: #1e2a44;
+      --border: #00cccc;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f1629 0%, #1a1a2e 100%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
@@ -28,176 +31,249 @@
       align-items: center;
       padding: 20px;
       overflow: hidden;
-      position: relative;
-    }
-
-    /* Анімовані машинки на фоні */
-    .car-bg {
-      position: absolute;
-      font-size: 2.5rem;
-      color: rgba(6, 182, 212, 0.15);
-      animation: drive linear infinite;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .car1 { top: 15%; left: -10%; animation-duration: 18s; }
-    .car2 { top: 45%; right: -10%; animation-duration: 22s; animation-direction: reverse; }
-    .car3 { bottom: 20%; left: -10%; animation-duration: 15s; }
-    .car4 { top: 70%; right: -10%; animation-duration: 20s; animation-direction: reverse; }
-
-    @keyframes drive {
-      from { transform: translateX(-150px); }
-      to { transform: translateX(calc(100vw + 150px)); }
     }
 
     .container {
-      background: var(--card);
+      background: var(--card-bg);
       padding: 32px;
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(6, 182, 212, 0.2);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 255, 255, 0.15);
       width: 100%;
       max-width: 420px;
-      text-align: center;
-      position: relative;
-      z-index: 1;
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(6, 182, 212, 0.3);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 4px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      animation: glow 2s infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
     }
 
     h1 {
       margin: 0 0 24px;
-      color: var(--accent);
-      font-family: 'Montserrat', sans-serif;
+      color: var(--primary);
       font-size: 1.8rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
+      text-align: center;
+      font-weight: 600;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
     }
-    h1 i { font-size: 2rem; }
 
     .input-group {
+      position: relative;
       margin-bottom: 16px;
-      text-align: left;
     }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--text-light);
-      font-size: 0.9rem;
-      font-weight: 500;
+
+    .input-group i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary);
+      font-size: 1.1rem;
+      z-index: 2;
     }
-    select, input {
+
+    input, select {
       width: 100%;
-      padding: 14px 16px;
-      border: 1px solid rgba(6, 182, 212, 0.5);
-      border-radius: 12px;
-      background: rgba(15, 23, 42, 0.6);
+      padding: 14px 14px 14px 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--input-bg);
       color: #fff;
       font-size: 1rem;
       transition: all 0.3s ease;
-    }
-    select:focus, input:focus {
       outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
-      background: rgba(15, 23, 42, 0.8);
     }
-    option { background: #1e293b; color: #fff; }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    .project-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
     button {
       width: 100%;
       padding: 14px;
-      background: var(--accent);
+      background: linear-gradient(45deg, #00cccc, var(--primary));
       color: #000;
       border: none;
-      border-radius: 12px;
-      font-weight: 600;
+      border-radius: 10px;
+      font-weight: bold;
       font-size: 1.1rem;
       cursor: pointer;
-      margin-top: 8px;
+      margin-top: 10px;
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
     }
+
     button:hover {
-      background: var(--accent-hover);
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
+      box-shadow: 0 6px 20px rgba(0, 255, 255, 0.4);
     }
-    button i { font-size: 1.2rem; }
+
+    button:active {
+      transform: translateY(0);
+    }
 
     .link-output {
-      margin-top: 24px;
+      margin-top: 20px;
       padding: 16px;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid var(--success);
-      border-radius: 12px;
+      background: var(--input-bg);
+      border: 1px dashed var(--primary);
+      border-radius: 10px;
       word-break: break-all;
       font-family: 'Courier New', monospace;
-      color: #86efac;
+      color: #0f0;
       font-size: 0.95rem;
       opacity: 0;
       transform: translateY(-10px);
       transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
     }
+
     .link-output.show {
       opacity: 1;
       transform: translateY(0);
     }
-    .link-output i {
-      color: var(--success);
-      margin-right: 8px;
+
+    .link-output::before {
+      content: 'Посилання:';
+      display: block;
+      color: var(--primary);
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .copy-btn {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      background: rgba(0, 255, 255, 0.2);
+      border: none;
+      color: var(--primary);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--primary);
+      color: #000;
     }
 
     .hidden { display: none; }
 
-    /* Логін */
-    #loginForm h1 { font-size: 1.6rem; }
-    #loginForm input { margin-bottom: 16px; }
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo i {
+      font-size: 3rem;
+      color: var(--primary);
+      text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .project-icon {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Анімовані машинки -->
-  <div class="car-bg car1"><i class="fas fa-car-side"></i></div>
-  <div class="car-bg car2"><i class="fas fa-truck"></i></div>
-  <div class="car-bg car3"><i class="fas fa-shuttle-van"></i></div>
-  <div class="car-bg car4"><i class="fas fa-taxi"></i></div>
-
-  <!-- Форма входу -->
+  <!-- Логін -->
   <div id="loginForm" class="container">
-    <h1><i class="fas fa-key"></i> Вхід у панель</h1>
-    <input type="password" id="password" placeholder="Введіть пароль" />
-    <button onclick="checkPassword()"><i class="fas fa-sign-in-alt"></i> Увійти</button>
+    <div class="logo">
+      <i class="fas fa-shield-alt"></i>
+    </div>
+    <h1>Вхід у панель</h1>
+    <div class="input-group">
+      <i class="fas fa-lock"></i>
+      <input type="password" id="password" placeholder="Введіть пароль" />
+    </div>
+    <button onclick="checkPassword()">
+      <i class="fas fa-sign-in-alt"></i> Увійти
+    </button>
   </div>
 
-  <!-- Основна панель -->
+  <!-- Панель генерації -->
   <div id="panel" class="container hidden">
-    <h1><i class="fas fa-link"></i> Генератор посилань</h1>
+    <div class="logo">
+      <i class="fas fa-link"></i>
+    </div>
+    <h1>Генератор посилань</h1>
     
     <div class="input-group">
-      <label for="project"><i class="fas fa-project-diagram"></i> Проект</label>
+      <i class="fas fa-project-diagram"></i>
       <select id="project">
-        <option value="dimria">DIM.RIA</option>
-        <option value="autoria">AUTO.RIA</option>
-        <option value="ria">RIA.COM</option>
-        <option value="olx">OLX.UA</option>
+        <option value="dimria" class="project-option">
+          <i class="fas fa-home"></i> DIM.RIA
+        </option>
+        <option value="autoria" class="project-option">
+          <i class="fas fa-car"></i> AUTO.RIA
+        </option>
+        <option value="ria" class="project-option">
+          <i class="fas fa-newspaper"></i> RIA.COM
+        </option>
+        <option value="olx" class="project-option">
+          <i class="fas fa-shopping-cart"></i> OLX.UA
+        </option>
       </select>
     </div>
 
     <div class="input-group">
-      <label for="nickname"><i class="fab fa-telegram-plane"></i> @username воркера</label>
-      <input type="text" id="nickname" placeholder="@username" />
+      <i class="fas fa-user-tag"></i>
+      <input type="text" id="nickname" placeholder="@username воркера" />
     </div>
 
-    <button onclick="generateLink()"><i class="fas fa-magic"></i> Створити посилання</button>
+    <button onclick="generateLink()">
+      <i class="fas fa-magic"></i> Створити посилання
+    </button>
 
     <div id="linkOutput" class="link-output">
-      <i class="fas fa-check-circle"></i> <span id="linkText"></span>
+      <button class="copy-btn" onclick="copyLink()">
+        <i class="fas fa-copy"></i>
+      </button>
+      <span id="linkText"></span>
     </div>
   </div>
 
@@ -209,53 +285,50 @@
       if (input === correctPassword) {
         document.getElementById("loginForm").classList.add("hidden");
         document.getElementById("panel").classList.remove("hidden");
-        document.getElementById("password").value = "";
+        document.getElementById("password").value = '';
       } else {
-        alert("🚫 Невірний пароль!");
+        alert("Невірний пароль!");
       }
     }
 
     function generateLink() {
       const project = document.getElementById("project").value;
-      const nickInput = document.getElementById("nickname").value.trim();
-      const nick = nickInput.replace(/^@/, '');
+      const nick = document.getElementById("nickname").value.trim().replace(/^@/, '');
       
       if (!nick) {
-        alert("⚠️ Введіть @username воркера!");
+        alert("Введіть @username воркера!");
         return;
       }
 
       const base = window.location.origin;
-      const refLink = `${base}/?project=${project}&ref=${btoa(encodeURIComponent(nick))}`;
+      const refLink = `${base}/?project=${project}&ref=${btoa(nick)}`;
 
-      const output = document.getElementById("linkText");
-      const container = document.getElementById("linkOutput");
+      const output = document.getElementById("linkOutput");
+      const linkText = document.getElementById("linkText");
       
-      output.textContent = refLink;
-      container.classList.add("show");
-      
-      // Копіювання в буфер (опціонально)
-      navigator.clipboard.writeText(refLink);
-      setTimeout(() => {
-        container.innerHTML = `<i class="fas fa-check-circle"></i> Посилання скопійовано в буфер!`;
-        setTimeout(() => {
-          container.classList.remove("show");
-          setTimeout(() => {
-            container.innerHTML = `<i class="fas fa-check-circle"></i> <span id="linkText"></span>`;
-          }, 400);
-        }, 2000);
-      }, 1500);
+      linkText.textContent = refLink;
+      output.classList.add("show");
     }
 
-    // Дозволяє Enter у полях
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        if (!document.getElementById("panel").classList.contains("hidden")) {
-          generateLink();
-        } else {
-          checkPassword();
-        }
-      }
+    function copyLink() {
+      const linkText = document.getElementById("linkText").textContent;
+      navigator.clipboard.writeText(linkText).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(() => {
+          btn.innerHTML = original;
+        }, 1000);
+      });
+    }
+
+    // Дозволяємо Enter для входу
+    document.getElementById("password").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") checkPassword();
+    });
+
+    document.getElementById("nickname").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") generateLink();
     });
   </script>
 </body>
